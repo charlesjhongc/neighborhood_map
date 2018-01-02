@@ -25,9 +25,9 @@
               </div>
             </div>
 
-            <ul class="list-group" data-bind="foreach: markers">
-              <li class="list-group-item list-group-item-action" data-bind="text: title"></li>
-            </ul>
+            <div class="list-group" data-bind="foreach: infomarkers()">
+              <li class="list-group-item list-group-item-action " data-toggle="list" data-bind="text: gmarker.title, click: $parent.show_clicked_marker"></li>
+            </div>
 
           </div>
 
@@ -40,7 +40,7 @@
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
-    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB4Qq9E1pEaYYhE5aLAvaai-fbZYm5tn3A&v=3&callback=initMap"></script>
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB4Qq9E1pEaYYhE5aLAvaai-fbZYm5tn3A&v=3&callback=viewmodel.initMap"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.4.2/knockout-min.js"></script>
     <script src="js/app.js"></script>
   </body>
