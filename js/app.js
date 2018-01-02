@@ -1,12 +1,43 @@
 var map;
+var marker_data = [
+  {
+    lat: 25.038525,
+    lng: 121.498121,
+    title: 'Stella'
+  },
+  {
+    lat: 25.0304996,
+    lng: 121.5212562,
+    title: '老王'
+  }
+];
+
 function initMap() {
  map = new google.maps.Map(document.getElementById('map'),{
-   center: {lat:25.1723919, lng:121.4464771},
+   center: {lat:25.034597, lng:121.5126302},
    zoom: 16
  });
- var marker = new google.maps.Marker({
-   position: {lat:25.038525, lng:121.498121},
-   map: map,
-   title: 'Stella'
+ marker_data.forEach(function(element){
+   new google.maps.Marker({
+     position: {lat:element.lat, lng:element.lng},
+     map: map,
+     title: element.title
+   });
  });
 }
+
+function model(){
+
+}
+
+function view(){
+
+}
+
+function Viewmodel(){
+  this.markers = marker_data;// use observable array??
+  this.setactive_marker = function(){
+  };
+}
+
+ko.applyBindings(new Viewmodel());

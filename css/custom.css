@@ -4,9 +4,11 @@ html, body, main{
   margin: 0;
   padding: 0;
 }
-#map {
-  height: 100%;
-}
+
 .full-height {
   height: 100%;
+}
+
+.test {
+  overflow: scroll;
 }
