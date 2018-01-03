@@ -25,15 +25,20 @@
               </div>
             </div>
 
-            <div class="list-group" data-bind="foreach: infomarkers()">
-              <li class="list-group-item list-group-item-action " data-toggle="list" data-bind="text: gmarker.title, click: $parent.show_clicked_li"></li>
-              <li class="list-group-item list-group-item-action " data-toggle="list" data-bind="text: raw_info.category()"></li>
+            <div class="list-group" data-bind="foreach: gmarkers()">
+              <li class="list-group-item list-group-item-action" data-bind="text: title, click: $parent.show_clicked_li"></li>
             </div>
 
           </div>
 
-          <div class="col-10 full-height">
+          <div class="col-8 full-height">
             <div class="full-height" id="map"></div>
+          </div>
+          <div class="col-2 full-height">
+            <h2 data-bind="text: current_location().title"></h2>
+            <h4 data-bind="text: current_location().category()"></h4>
+            <h5 data-bind="text: current_location().phone()"></h5>
+            <img data-bind="attr: { src: current_location().img() }">
           </div>
         </div>
       </div>

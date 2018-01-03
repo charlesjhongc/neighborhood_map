@@ -1,6 +1,3 @@
-function Infomarker() {
-}
-
 function Model() {
   this.locations = [
     {
@@ -8,24 +5,28 @@ function Model() {
       lng: 121.518624,
       title: '[Food] Kinfen Braised Pork Rice (金峰魯肉飯)',
       phone: ko.observable(),
-      category: ko.observable()
+      category: ko.observable(),
+      img: ko.observable()
     },
     {
       lat: 25.034067,
       lng: 121.523703,
       title: '[Food] Hangzhou Xiaolong Tangbao (杭州小籠湯包)',
       phone: ko.observable(),
-      category: ko.observable()
+      category: ko.observable(),
+      img: ko.observable()
     },
     {
       lat: 25.0261069,
       lng: 121.5212271,
       title: '[Coffee] Cafe Macho (早秋咖啡)',
       phone: ko.observable(),
-      category: ko.observable()
+      category: ko.observable(),
+      img: ko.observable()
     }
   ];
-  this.locations.forEach(function(location){
+  this.locations.forEach(function(location)
+  {
     //Ajax here
     var client_id = 'HIIKQF305SCRIAJTB3YOG3WTAZNJY2KCY4K0GSOM2E03VYEM';
     var client_secret = '41XU11PQL2ACJNKLF41CDGCQR2JHZLYEIK4XPUYFHZXPZUP2';
@@ -40,76 +41,102 @@ function Model() {
             +location.lat
             +','
             +location.lng;
-    var venue_photo_url = 'https://api.foursquare.com/v2/venues/@@@@@@@VENUE_ID@@@@@@@/photos';
-
     fetch(venue_search_url).then(function(response) {
       return response.json();
     },function(response){
       console.log('Fetch Failed');
     }).then(function(body_json){
-      location.phone = ko.observable(body_json.response.venues[0].contact.formattedPhone);
-      location.category = ko.observable(body_json.response.venues[0].categories.name);
-      //location.photo =
+      location.phone(body_json.response.venues[0].contact.formattedPhone);
+      location.category(body_json.response.venues[0].categories[0].name);
+      var venue_photo_url = 'https://api.foursquare.com/v2/venues/'
+              +body_json.response.venues[0].id
+              +'/photos?client_id='
+              +client_id
+              +'&client_secret='
+              +client_secret
+              +'&v='
+              +versioning;
+      fetch(venue_photo_url).then(function(response) {
+        return response.json();
+      },function(response){
+        console.log('Fetch Failed');
+      }).then(function(body_json){
+        var final_img_url = body_json.response.photos.items[0].prefix
+                      +'width300'
+                      +body_json.response.photos.items[0].suffix;
+        location.img(final_img_url);
+      });
     });
   });
 }
 
-function View(){
-  // Do I really need a View? In KO, HTML IS THE VIEW!that's official doc says
-  /*
-  this.clearMarkers = function() {
-    for (var i = 0; i < markers.length; i++) {
-      markers[i].setMap(null);
-    }
-    markers = [];
-  };*/
-
-  this.toggleBounce = function(infomarker) {
-    if (infomarker.getAnimation() !== null) {
-      infomarker.setAnimation(null);
-    } else {
-      infomarker.setAnimation(google.maps.Animation.BOUNCE);
-    };
-  }
-}
-
 function Viewmodel() {
   var self = this;
-  this.infomarkers =  ko.observableArray();
+  this.gmarkers =  ko.observableArray();
+  this.current_location = ko.observable(model.locations[0]);
 
   this.initMap = function() {
+    self.infowindow = new google.maps.InfoWindow({
+    });
     self.map = new google.maps.Map(document.getElementById('map'),{
       center: {lat:25.034597, lng:121.5126302},
       zoom: 16
     });
     var bounds = new google.maps.LatLngBounds();
-    model.locations.forEach(function(element,index){
-      var new_infomarker = new Infomarker();
-      new_infomarker.raw_info = element.;
-      new_infomarker.gmarker = new google.maps.Marker({
-        position: {lat:element.lat, lng:element.lng},
+    for(var i = 0; i<model.locations.length; i++)
+    {
+      var new_marker = new google.maps.Marker({
+        position: {lat:model.locations[i].lat, lng:model.locations[i].lng},
         map: self.map,
         animation: google.maps.Animation.DROP,
-        title: element.title
+        title: model.locations[i].title
       });
-      new_infomarker.gmarker.addListener('click', function() {
-        view.toggleBounce(this);
-        new_infomarker.infowindow.open(self.map, new_infomarker.gmarker);//????????
+      new_marker.index = i;
+      // Is this a good idea to add property to a definded object prototype?
+      new_marker.addListener('click', function() {
+        self.toggleBounce(this);
+        self.populateInfo(this)
       });
-      new_infomarker.infowindow = new google.maps.InfoWindow({
-        content: '<p data-bind="text: infomarkers().[' + index + '].raw_info.phone()"></p>'
-      });
-      bounds.extend(new_infomarker.gmarker.position);
-      self.infomarkers.push(new_infomarker);
-
-
-    });
+      self.gmarkers.push(new_marker);
+      bounds.extend(new_marker.position);
+    }
     self.map.fitBounds(bounds);
   };
 
-  this.show_clicked_li = function(clicked_infomarker) {
-    clicked_infomarker.infowindow.open(self.map, clicked_infomarker.gmarker);
-    self.map.setCenter(clicked_infomarker.gmarker.position);
+  this.populateInfo = function(marker) {
+    var self = this;
+    self.current_location(model.locations[marker.index]);
+    // Check to make sure the infowindow is not already opened on this marker.
+    if (self.infowindow.marker != marker) {
+      self.infowindow.marker = marker;
+      self.infowindow.setContent('<div>' + marker.title + '</div>');
+      self.infowindow.open(map, marker);
+      // Make sure the marker property is cleared if the infowindow is closed.
+      self.infowindow.addListener('closeclick',function(){
+        self.infowindow.setMarker = null;
+      });
+    }
+  };
+
+  this.show_clicked_li = function(clicked_gmarker) {
+    self.toggleBounce(clicked_gmarker);
+    self.populateInfo(clicked_gmarker);
+    self.map.setCenter(clicked_gmarker.position);
+  };
+
+  this.toggleBounce = function(marker) {
+    if (marker.getAnimation() !== null) {
+      marker.setAnimation(null);
+    } else {
+      marker.setAnimation(google.maps.Animation.BOUNCE);
+    };
+  };
+
+  this.clearMarkers = function() {
+    for(var i = 0; i<gmarkers().length; i++)
+    {
+      gmarkers()[i].setMap(null);
+    }
   };
 
   /*
@@ -128,10 +155,10 @@ function Viewmodel() {
         animation: google.maps.Animation.DROP
       }));
     }, timeout);
-  };*/
+  };
+  */
 }
 
 var model = new Model();
-var view = new View();
 var viewmodel =  new Viewmodel();
 ko.applyBindings(viewmodel);
