@@ -26,7 +26,8 @@
             </div>
 
             <div class="list-group" data-bind="foreach: infomarkers()">
-              <li class="list-group-item list-group-item-action " data-toggle="list" data-bind="text: gmarker.title, click: $parent.show_clicked_marker"></li>
+              <li class="list-group-item list-group-item-action " data-toggle="list" data-bind="text: gmarker.title, click: $parent.show_clicked_li"></li>
+              <li class="list-group-item list-group-item-action " data-toggle="list" data-bind="text: raw_info.category()"></li>
             </div>
 
           </div>
