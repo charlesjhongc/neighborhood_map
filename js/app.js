@@ -159,8 +159,6 @@ function Viewmodel() {
 
   this.filter_submit = function(formelement) {
     var key = $(formelement).children('input').first().val();
-    if(key == '')
-      return;
     self.clearMarkers();
     for(var i = 0; i<self.gmarkers().length; i++) {
       if(self.gmarkers()[i].title.toLowerCase().indexOf(key.toLowerCase()) != -1)
