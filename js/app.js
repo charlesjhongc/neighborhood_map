@@ -83,8 +83,7 @@ function Viewmodel() {
       zoom: 16
     });
     var bounds = new google.maps.LatLngBounds();
-    for(var i = 0; i<model.locations.length; i++)
-    {
+    for(var i = 0; i<model.locations.length; i++) {
       var new_marker = new google.maps.Marker({
         position: {lat:model.locations[i].lat, lng:model.locations[i].lng},
         map: self.map,
@@ -92,6 +91,7 @@ function Viewmodel() {
         title: model.locations[i].title
       });
       new_marker.index = i;
+      new_marker.is_active = ko.observable(true);
       // Is this a good idea to add property to a definded object prototype?
       new_marker.addListener('click', function() {
         self.toggleBounce(this);
@@ -101,10 +101,9 @@ function Viewmodel() {
       bounds.extend(new_marker.position);
     }
     self.map.fitBounds(bounds);
-  };
+  }
 
   this.populateInfo = function(marker) {
-    var self = this;
     self.current_location(model.locations[marker.index]);
     // Check to make sure the infowindow is not already opened on this marker.
     if (self.infowindow.marker != marker) {
@@ -116,37 +115,51 @@ function Viewmodel() {
         self.infowindow.setMarker = null;
       });
     }
-  };
+  }
 
   this.show_clicked_li = function(clicked_gmarker) {
     self.toggleBounce(clicked_gmarker);
     self.populateInfo(clicked_gmarker);
     self.map.setCenter(clicked_gmarker.position);
-  };
+  }
+
+  this.filter_submit = function(formelement) {
+    var key = $(formelement).children('input').first().val();
+    // TODO:key != ''
+    self.clearMarkers();
+    // TODO:lowercase search
+    for(var i = 0; i<self.gmarkers().length; i++) {
+      if(self.gmarkers()[i].title.indexOf(key) != -1)
+        self.gmarkers()[i].is_active(true);
+      else
+        self.gmarkers()[i].is_active(false);
+    }
+    self.drop();
+  }
 
   this.toggleBounce = function(marker) {
     if (marker.getAnimation() !== null) {
       marker.setAnimation(null);
     } else {
       marker.setAnimation(google.maps.Animation.BOUNCE);
-    };
-  };
-
-  this.clearMarkers = function() {
-    for(var i = 0; i<gmarkers().length; i++)
-    {
-      gmarkers()[i].setMap(null);
-    }
-  };
-
-  /*
-  this.drop() {
-    clearMarkers();
-    for (var i = 0; i < neighborhoods.length; i++) {
-      addMarkerWithTimeout(neighborhoods[i], i * 200);
     }
   }
 
+  this.drop = function() {
+    for(var i = 0; i<self.gmarkers().length; i++) {
+      if(self.gmarkers()[i].is_active())
+        self.gmarkers()[i].setMap(self.map);
+        //addMarkerWithTimeout(neighborhoods[i], i * 200);
+    }
+  }
+
+  this.clearMarkers = function() {
+    for(var i = 0; i<self.gmarkers().length; i++) {
+      self.gmarkers()[i].setMap(null);
+      self.gmarkers()[i].is_active(false);
+    }
+  }
+  /*
   this.dropMarkerWithTimeout = function(position, timeout) {
     window.setTimeout(function() {
       markers.push(new google.maps.Marker({

@@ -18,15 +18,15 @@
         <div class="row full-height">
           <div class="col-2">
 
-            <div class="input-group mb-3">
-              <input type="text" class="form-control" placeholder="Keywords..." aria-label="Recipient's username" aria-describedby="basic-addon2">
+            <form class="input-group mb-3" data-bind="submit: filter_submit">
+              <input type="text" class="form-control" placeholder="Keywords...">
               <div class="input-group-append">
-                <button class="btn btn-outline-secondary" type="button">Filter</button>
+                <button class="btn btn-outline-secondary" type="submit">Filter</button>
               </div>
-            </div>
+            </form>
 
             <div class="list-group" data-bind="foreach: gmarkers()">
-              <li class="list-group-item list-group-item-action" data-bind="text: title, click: $parent.show_clicked_li"></li>
+              <li class="list-group-item list-group-item-action" data-bind="visible: is_active(), text: title, click: $parent.show_clicked_li"></li>
             </div>
 
           </div>
