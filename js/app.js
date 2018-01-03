@@ -3,26 +3,58 @@ function Model() {
     {
       lat: 25.0321172,
       lng: 121.518624,
-      title: '[Food] Kinfen Braised Pork Rice (金峰魯肉飯)',
+      title: 'Kinfen Braised Pork Rice (金峰魯肉飯)',
       phone: ko.observable(),
       category: ko.observable(),
-      img: ko.observable()
+      img: ko.observableArray()
     },
     {
       lat: 25.034067,
       lng: 121.523703,
-      title: '[Food] Hangzhou Xiaolong Tangbao (杭州小籠湯包)',
+      title: 'Hangzhou Xiaolong Tangbao (杭州小籠湯包)',
       phone: ko.observable(),
       category: ko.observable(),
-      img: ko.observable()
+      img: ko.observableArray()
     },
     {
-      lat: 25.0261069,
-      lng: 121.5212271,
-      title: '[Coffee] Cafe Macho (早秋咖啡)',
+      lat: 25.0469202,
+      lng: 121.5413122,
+      title: 'Lin Dong Fang Beef Noodle (林東芳牛肉麵)',
       phone: ko.observable(),
       category: ko.observable(),
-      img: ko.observable()
+      img: ko.observableArray()
+    },
+    {
+      lat: 25.0665239,
+      lng: 121.537716,
+      title: 'Addiction Aquatic Development (上引水產)',
+      phone: ko.observable(),
+      category: ko.observable(),
+      img: ko.observableArray()
+    },
+    {
+      lat: 25.0455379,
+      lng: 121.5484924,
+      title: 'Mitsui Cuisine (三井日本料理)',
+      phone: ko.observable(),
+      category: ko.observable(),
+      img: ko.observableArray()
+    },
+    {
+      lat: 25.0432672,
+      lng: 121.5495064,
+      title: 'Toasteria Cafe',
+      phone: ko.observable(),
+      category: ko.observable(),
+      img: ko.observableArray()
+    },
+    {
+      lat: 25.0433851,
+      lng: 121.5077059,
+      title: 'Ay-Chung Flour-Rice Noodle (阿宗麵線)',
+      phone: ko.observable(),
+      category: ko.observable(),
+      img: ko.observableArray()
     }
   ];
   this.locations.forEach(function(location)
@@ -61,10 +93,12 @@ function Model() {
       },function(response){
         console.log('Fetch Failed');
       }).then(function(body_json){
-        var final_img_url = body_json.response.photos.items[0].prefix
-                      +'width300'
-                      +body_json.response.photos.items[0].suffix;
-        location.img(final_img_url);
+        for(var i = 0; i<3; i++) {
+          var final_img_url = body_json.response.photos.items[i].prefix
+                        +'width300'
+                        +body_json.response.photos.items[i].suffix;
+          location.img.push(final_img_url);
+        }
       });
     });
   });
@@ -125,11 +159,11 @@ function Viewmodel() {
 
   this.filter_submit = function(formelement) {
     var key = $(formelement).children('input').first().val();
-    // TODO:key != ''
+    if(key == '')
+      return;
     self.clearMarkers();
-    // TODO:lowercase search
     for(var i = 0; i<self.gmarkers().length; i++) {
-      if(self.gmarkers()[i].title.indexOf(key) != -1)
+      if(self.gmarkers()[i].title.toLowerCase().indexOf(key.toLowerCase()) != -1)
         self.gmarkers()[i].is_active(true);
       else
         self.gmarkers()[i].is_active(false);
@@ -147,9 +181,10 @@ function Viewmodel() {
 
   this.drop = function() {
     for(var i = 0; i<self.gmarkers().length; i++) {
-      if(self.gmarkers()[i].is_active())
+      if(self.gmarkers()[i].is_active()) {
+        self.gmarkers()[i].setAnimation(google.maps.Animation.DROP);
         self.gmarkers()[i].setMap(self.map);
-        //addMarkerWithTimeout(neighborhoods[i], i * 200);
+      }
     }
   }
 
@@ -159,17 +194,6 @@ function Viewmodel() {
       self.gmarkers()[i].is_active(false);
     }
   }
-  /*
-  this.dropMarkerWithTimeout = function(position, timeout) {
-    window.setTimeout(function() {
-      markers.push(new google.maps.Marker({
-        position: position,
-        map: map,
-        animation: google.maps.Animation.DROP
-      }));
-    }, timeout);
-  };
-  */
 }
 
 var model = new Model();

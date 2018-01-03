@@ -38,7 +38,9 @@
             <h2 data-bind="text: current_location().title"></h2>
             <h4 data-bind="text: current_location().category()"></h4>
             <h5 data-bind="text: current_location().phone()"></h5>
-            <img data-bind="attr: { src: current_location().img() }">
+            <div data-bind="foreach: current_location().img()">
+              <img data-bind="attr: { src: $data }">
+            </div>
           </div>
         </div>
       </div>
