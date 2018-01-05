@@ -5,6 +5,7 @@ function Model() {
       lng: 121.518624,
       title: 'Kinfen Braised Pork Rice (金峰魯肉飯)',
       foursquare_api_loaded: ko.observable(false),
+      address: ko.observableArray(),
       phone: ko.observable(),
       category: ko.observable(),
       img: ko.observableArray()
@@ -14,6 +15,7 @@ function Model() {
       lng: 121.523703,
       title: 'Hangzhou Xiaolong Tangbao (杭州小籠湯包)',
       foursquare_api_loaded: ko.observable(false),
+      address: ko.observableArray(),
       phone: ko.observable(),
       category: ko.observable(),
       img: ko.observableArray()
@@ -23,6 +25,7 @@ function Model() {
       lng: 121.5413122,
       title: 'Lin Dong Fang Beef Noodle (林東芳牛肉麵)',
       foursquare_api_loaded: ko.observable(false),
+      address: ko.observableArray(),
       phone: ko.observable(),
       category: ko.observable(),
       img: ko.observableArray()
@@ -32,6 +35,7 @@ function Model() {
       lng: 121.537716,
       title: 'Addiction Aquatic Development (上引水產)',
       foursquare_api_loaded: ko.observable(false),
+      address: ko.observableArray(),
       phone: ko.observable(),
       category: ko.observable(),
       img: ko.observableArray()
@@ -41,15 +45,17 @@ function Model() {
       lng: 121.5267065,
       title: 'Mitsui Cuisine (三井日本料理)',
       foursquare_api_loaded: ko.observable(false),
+      address: ko.observableArray(),
       phone: ko.observable(),
       category: ko.observable(),
       img: ko.observableArray()
     },
     {
-      lat: 25.043385,
-      lng: 121.549495,
+      lat: 25.043309,
+      lng: 121.549507,
       title: 'Toasteria Cafe',
       foursquare_api_loaded: ko.observable(false),
+      address: ko.observableArray(),
       phone: ko.observable(),
       category: ko.observable(),
       img: ko.observableArray()
@@ -59,13 +65,50 @@ function Model() {
       lng: 121.507630,
       title: 'Ay-Chung Flour-Rice Noodle (阿宗麵線)',
       foursquare_api_loaded: ko.observable(false),
+      address: ko.observableArray(),
       phone: ko.observable(),
       category: ko.observable(),
       img: ko.observableArray()
     }
   ];
-  this.locations.forEach(function(location)
-  {
+}
+
+function Viewmodel() {
+  var self = this;
+  this.gmarkers =  ko.observableArray();
+  this.current_location = ko.observable(model.locations[0]);
+
+  this.initMap = function() {
+    self.infowindow = new google.maps.InfoWindow({
+    });
+    self.map = new google.maps.Map(document.getElementById('map'),{
+      center: {lat:25.034597, lng:121.5126302},
+      zoom: 16
+    });
+    var bounds = new google.maps.LatLngBounds();
+    for(var i = 0; i<model.locations.length; i++) {
+      var new_marker = new google.maps.Marker({
+        position: {lat:model.locations[i].lat, lng:model.locations[i].lng},
+        map: self.map,
+        animation: google.maps.Animation.DROP,
+        title: model.locations[i].title
+      });
+      new_marker.is_active = ko.observable(true);
+      // Is this a good idea to add property to a definded object prototype?
+      new_marker.addListener('click', function() {
+        var index = self.gmarkers.indexOf(this);
+        console.log(index);
+        self.get_location_data(model.locations[index]);
+        self.toggleBounce(this);
+        self.populateInfo(this, index);
+      });
+      self.gmarkers.push(new_marker);
+      bounds.extend(new_marker.position);
+    }
+    self.map.fitBounds(bounds);
+  }
+
+  this.get_location_data = function(location) {
     //Ajax here
     var client_id = 'HIIKQF305SCRIAJTB3YOG3WTAZNJY2KCY4K0GSOM2E03VYEM';
     var client_secret = '41XU11PQL2ACJNKLF41CDGCQR2JHZLYEIK4XPUYFHZXPZUP2';
@@ -103,6 +146,7 @@ function Model() {
     fetch(venue_search_url).then(fetch_success,fetch_fail).then(function(body_json){
       location.phone(body_json.response.venues[0].contact.formattedPhone);
       location.category(body_json.response.venues[0].categories[0].name);
+      location.address(body_json.response.venues[0].location.formattedAddress);
       var venue_photo_url = 'https://api.foursquare.com/v2/venues/'
                             + body_json.response.venues[0].id
                             + '/photos?'
@@ -116,44 +160,10 @@ function Model() {
         }
       });
     });
-  });
-}
-
-function Viewmodel() {
-  var self = this;
-  this.gmarkers =  ko.observableArray();
-  this.current_location = ko.observable(model.locations[0]);
-
-  this.initMap = function() {
-    self.infowindow = new google.maps.InfoWindow({
-    });
-    self.map = new google.maps.Map(document.getElementById('map'),{
-      center: {lat:25.034597, lng:121.5126302},
-      zoom: 16
-    });
-    var bounds = new google.maps.LatLngBounds();
-    for(var i = 0; i<model.locations.length; i++) {
-      var new_marker = new google.maps.Marker({
-        position: {lat:model.locations[i].lat, lng:model.locations[i].lng},
-        map: self.map,
-        animation: google.maps.Animation.DROP,
-        title: model.locations[i].title
-      });
-      new_marker.index = i;
-      new_marker.is_active = ko.observable(true);
-      // Is this a good idea to add property to a definded object prototype?
-      new_marker.addListener('click', function() {
-        self.toggleBounce(this);
-        self.populateInfo(this)
-      });
-      self.gmarkers.push(new_marker);
-      bounds.extend(new_marker.position);
-    }
-    self.map.fitBounds(bounds);
   }
 
-  this.populateInfo = function(marker) {
-    self.current_location(model.locations[marker.index]);
+  this.populateInfo = function(marker, index) {
+    self.current_location(model.locations[index]);
     // Check to make sure the infowindow is not already opened on this marker.
     if (self.infowindow.marker != marker) {
       self.infowindow.marker = marker;
@@ -167,8 +177,10 @@ function Viewmodel() {
   }
 
   this.show_clicked_li = function(clicked_gmarker) {
+    var index = self.gmarkers.indexOf(clicked_gmarker);
+    self.get_location_data(model.locations[index]);
     self.toggleBounce(clicked_gmarker);
-    self.populateInfo(clicked_gmarker);
+    self.populateInfo(clicked_gmarker, index);
     self.map.setCenter(clicked_gmarker.position);
   }
 
