@@ -4,6 +4,7 @@ function Model() {
       lat: 25.0321172,
       lng: 121.518624,
       title: 'Kinfen Braised Pork Rice (金峰魯肉飯)',
+      foursquare_api_loaded: ko.observable(false),
       phone: ko.observable(),
       category: ko.observable(),
       img: ko.observableArray()
@@ -12,6 +13,7 @@ function Model() {
       lat: 25.034067,
       lng: 121.523703,
       title: 'Hangzhou Xiaolong Tangbao (杭州小籠湯包)',
+      foursquare_api_loaded: ko.observable(false),
       phone: ko.observable(),
       category: ko.observable(),
       img: ko.observableArray()
@@ -20,6 +22,7 @@ function Model() {
       lat: 25.0469202,
       lng: 121.5413122,
       title: 'Lin Dong Fang Beef Noodle (林東芳牛肉麵)',
+      foursquare_api_loaded: ko.observable(false),
       phone: ko.observable(),
       category: ko.observable(),
       img: ko.observableArray()
@@ -28,30 +31,34 @@ function Model() {
       lat: 25.0665239,
       lng: 121.537716,
       title: 'Addiction Aquatic Development (上引水產)',
+      foursquare_api_loaded: ko.observable(false),
       phone: ko.observable(),
       category: ko.observable(),
       img: ko.observableArray()
     },
     {
-      lat: 25.0455379,
-      lng: 121.5484924,
+      lat: 25.0648892,
+      lng: 121.5267065,
       title: 'Mitsui Cuisine (三井日本料理)',
+      foursquare_api_loaded: ko.observable(false),
       phone: ko.observable(),
       category: ko.observable(),
       img: ko.observableArray()
     },
     {
-      lat: 25.0432672,
-      lng: 121.5495064,
+      lat: 25.043385,
+      lng: 121.549495,
       title: 'Toasteria Cafe',
+      foursquare_api_loaded: ko.observable(false),
       phone: ko.observable(),
       category: ko.observable(),
       img: ko.observableArray()
     },
     {
-      lat: 25.0433851,
-      lng: 121.5077059,
+      lat: 25.043373,
+      lng: 121.507630,
       title: 'Ay-Chung Flour-Rice Noodle (阿宗麵線)',
+      foursquare_api_loaded: ko.observable(false),
       phone: ko.observable(),
       category: ko.observable(),
       img: ko.observableArray()
@@ -63,36 +70,44 @@ function Model() {
     var client_id = 'HIIKQF305SCRIAJTB3YOG3WTAZNJY2KCY4K0GSOM2E03VYEM';
     var client_secret = '41XU11PQL2ACJNKLF41CDGCQR2JHZLYEIK4XPUYFHZXPZUP2';
     var versioning = '20180101';
-    var venue_search_url = 'https://api.foursquare.com/v2/venues/search?client_id='
-            +client_id
-            +'&client_secret='
-            +client_secret
-            +'&v='
-            +versioning
-            +'&ll='
-            +location.lat
-            +','
-            +location.lng;
-    fetch(venue_search_url).then(function(response) {
-      return response.json();
-    },function(response){
-      console.log('Fetch Failed');
-    }).then(function(body_json){
+    var foursquare_auth = 'client_id='
+                          + client_id
+                          + '&client_secret='
+                          + client_secret
+                          + '&v='
+                          + versioning;
+    var venue_search_url = 'https://api.foursquare.com/v2/venues/search?'
+            + foursquare_auth
+            + '&ll='
+            + location.lat
+            + ','
+            + location.lng;
+
+    function fetch_success(response) {
+      if(response.ok) {
+        location.foursquare_api_loaded(true);
+        return response.json();//@@@@@@@ return?
+      }else {
+        // response with error
+        alert("Foursquare API error");
+        return false;
+      }
+    }
+
+    function fetch_fail(response) {
+      // network problem
+      alert("Networking error");
+      return false;
+    }
+
+    fetch(venue_search_url).then(fetch_success,fetch_fail).then(function(body_json){
       location.phone(body_json.response.venues[0].contact.formattedPhone);
       location.category(body_json.response.venues[0].categories[0].name);
       var venue_photo_url = 'https://api.foursquare.com/v2/venues/'
-              +body_json.response.venues[0].id
-              +'/photos?client_id='
-              +client_id
-              +'&client_secret='
-              +client_secret
-              +'&v='
-              +versioning;
-      fetch(venue_photo_url).then(function(response) {
-        return response.json();
-      },function(response){
-        console.log('Fetch Failed');
-      }).then(function(body_json){
+                            + body_json.response.venues[0].id
+                            + '/photos?'
+                            + foursquare_auth;
+      fetch(venue_photo_url).then(fetch_success,fetch_fail).then(function(body_json){
         for(var i = 0; i<3; i++) {
           var final_img_url = body_json.response.photos.items[i].prefix
                         +'width300'

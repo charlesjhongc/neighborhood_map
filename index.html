@@ -34,7 +34,7 @@
           <div class="col-8 full-height">
             <div class="full-height" id="map"></div>
           </div>
-          <div class="col-2 full-height">
+          <div class="col-2 full-height" data-bind="visible: current_location().foursquare_api_loaded()">
             <h2 data-bind="text: current_location().title"></h2>
             <h4 data-bind="text: current_location().category()"></h4>
             <h5 data-bind="text: current_location().phone()"></h5>
