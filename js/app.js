@@ -11,8 +11,8 @@ function Model() {
       img: ko.observableArray()
     },
     {
-      lat: 25.034067,
-      lng: 121.523703,
+      lat: 25.034066,
+      lng: 121.523722,
       title: 'Hangzhou Xiaolong Tangbao (杭州小籠湯包)',
       foursquare_api_loaded: ko.observable(false),
       address: ko.observableArray(),
@@ -51,8 +51,8 @@ function Model() {
       img: ko.observableArray()
     },
     {
-      lat: 25.043309,
-      lng: 121.549507,
+      lat: 25.043302,
+      lng: 121.549506,
       title: 'Toasteria Cafe',
       foursquare_api_loaded: ko.observable(false),
       address: ko.observableArray(),
