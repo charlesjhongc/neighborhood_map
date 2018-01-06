@@ -77,6 +77,7 @@ function Viewmodel() {
   var self = this;
   this.gmarkers =  ko.observableArray();
   this.current_location = ko.observable(model.locations[0]);
+  this.filter_keywords= '';
 
   this.initMap = function() {
     self.infowindow = new google.maps.InfoWindow({
@@ -85,7 +86,7 @@ function Viewmodel() {
       center: {lat:25.034597, lng:121.5126302},
       zoom: 16
     });
-    var listening_function = function() {
+    var listeningFunction = function() {
       var index = self.gmarkers.indexOf(this);
       self.get_location_data(model.locations[index]);
       self.toggleBounce(this);
@@ -101,7 +102,7 @@ function Viewmodel() {
       });
       new_marker.is_active = ko.observable(true);
       // Is this a good idea to add property to a definded object prototype?
-      new_marker.addListener('click', listening_function);
+      new_marker.addListener('click', listeningFunction);
       self.gmarkers.push(new_marker);
       bounds.extend(new_marker.position);
     }
@@ -184,8 +185,9 @@ function Viewmodel() {
     self.map.setCenter(clicked_gmarker.position);
   };
 
-  this.filter_submit = function(formelement) {
-    var key = $(formelement).children('input').first().val();
+
+  this.filter_submit = function() {
+    var key = self.filter_keywords;
     self.clearMarkers();
     for(var i = 0; i<self.gmarkers().length; i++) {
       if(self.gmarkers()[i].title.toLowerCase().indexOf(key.toLowerCase()) != -1)
@@ -200,8 +202,15 @@ function Viewmodel() {
     if (marker.getAnimation() !== null) {
       marker.setAnimation(null);
     } else {
-      marker.setAnimation(google.maps.Animation.BOUNCE);
+      self.setBounceWithTimeout(marker);
     }
+  };
+
+  this.setBounceWithTimeout = function(marker) {
+    marker.setAnimation(google.maps.Animation.BOUNCE);
+    window.setTimeout(function(){
+      marker.setAnimation(null);
+    }, 700);
   };
 
   this.drop = function() {
@@ -218,6 +227,10 @@ function Viewmodel() {
       self.gmarkers()[i].setMap(null);
       self.gmarkers()[i].is_active(false);
     }
+  };
+
+  this.googleMapsFail = function() {
+    alert("Google Maps Loading Error");
   };
 }
 
