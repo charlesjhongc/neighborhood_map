@@ -85,6 +85,12 @@ function Viewmodel() {
       center: {lat:25.034597, lng:121.5126302},
       zoom: 16
     });
+    var listening_function = function() {
+      var index = self.gmarkers.indexOf(this);
+      self.get_location_data(model.locations[index]);
+      self.toggleBounce(this);
+      self.populateInfo(this, index);
+    };
     var bounds = new google.maps.LatLngBounds();
     for(var i = 0; i<model.locations.length; i++) {
       var new_marker = new google.maps.Marker({
@@ -95,36 +101,30 @@ function Viewmodel() {
       });
       new_marker.is_active = ko.observable(true);
       // Is this a good idea to add property to a definded object prototype?
-      new_marker.addListener('click', function() {
-        var index = self.gmarkers.indexOf(this);
-        console.log(index);
-        self.get_location_data(model.locations[index]);
-        self.toggleBounce(this);
-        self.populateInfo(this, index);
-      });
+      new_marker.addListener('click', listening_function);
       self.gmarkers.push(new_marker);
       bounds.extend(new_marker.position);
     }
     self.map.fitBounds(bounds);
-  }
+  };
 
   this.get_location_data = function(location) {
     //Ajax here
     var client_id = 'HIIKQF305SCRIAJTB3YOG3WTAZNJY2KCY4K0GSOM2E03VYEM';
     var client_secret = '41XU11PQL2ACJNKLF41CDGCQR2JHZLYEIK4XPUYFHZXPZUP2';
     var versioning = '20180101';
-    var foursquare_auth = 'client_id='
-                          + client_id
-                          + '&client_secret='
-                          + client_secret
-                          + '&v='
-                          + versioning;
-    var venue_search_url = 'https://api.foursquare.com/v2/venues/search?'
-            + foursquare_auth
-            + '&ll='
-            + location.lat
-            + ','
-            + location.lng;
+    var foursquare_auth = 'client_id='+
+                            client_id+
+                            '&client_secret='+
+                            client_secret+
+                            '&v='+
+                            versioning;
+    var venue_search_url = 'https://api.foursquare.com/v2/venues/search?'+
+                            foursquare_auth+
+                            '&ll='+
+                            location.lat+
+                            ','+
+                            location.lng;
 
     function fetch_success(response) {
       if(response.ok) {
@@ -147,20 +147,20 @@ function Viewmodel() {
       location.phone(body_json.response.venues[0].contact.formattedPhone);
       location.category(body_json.response.venues[0].categories[0].name);
       location.address(body_json.response.venues[0].location.formattedAddress);
-      var venue_photo_url = 'https://api.foursquare.com/v2/venues/'
-                            + body_json.response.venues[0].id
-                            + '/photos?'
-                            + foursquare_auth;
+      var venue_photo_url = 'https://api.foursquare.com/v2/venues/'+
+                              body_json.response.venues[0].id+
+                              '/photos?'+
+                              foursquare_auth;
       fetch(venue_photo_url).then(fetch_success,fetch_fail).then(function(body_json){
         for(var i = 0; i<3; i++) {
-          var final_img_url = body_json.response.photos.items[i].prefix
-                        +'width300'
-                        +body_json.response.photos.items[i].suffix;
+          var final_img_url = body_json.response.photos.items[i].prefix+
+                                'width300'+
+                                body_json.response.photos.items[i].suffix;
           location.img.push(final_img_url);
         }
       });
     });
-  }
+  };
 
   this.populateInfo = function(marker, index) {
     self.current_location(model.locations[index]);
@@ -174,7 +174,7 @@ function Viewmodel() {
         self.infowindow.setMarker = null;
       });
     }
-  }
+  };
 
   this.show_clicked_li = function(clicked_gmarker) {
     var index = self.gmarkers.indexOf(clicked_gmarker);
@@ -182,7 +182,7 @@ function Viewmodel() {
     self.toggleBounce(clicked_gmarker);
     self.populateInfo(clicked_gmarker, index);
     self.map.setCenter(clicked_gmarker.position);
-  }
+  };
 
   this.filter_submit = function(formelement) {
     var key = $(formelement).children('input').first().val();
@@ -194,7 +194,7 @@ function Viewmodel() {
         self.gmarkers()[i].is_active(false);
     }
     self.drop();
-  }
+  };
 
   this.toggleBounce = function(marker) {
     if (marker.getAnimation() !== null) {
@@ -202,7 +202,7 @@ function Viewmodel() {
     } else {
       marker.setAnimation(google.maps.Animation.BOUNCE);
     }
-  }
+  };
 
   this.drop = function() {
     for(var i = 0; i<self.gmarkers().length; i++) {
@@ -211,14 +211,14 @@ function Viewmodel() {
         self.gmarkers()[i].setMap(self.map);
       }
     }
-  }
+  };
 
   this.clearMarkers = function() {
     for(var i = 0; i<self.gmarkers().length; i++) {
       self.gmarkers()[i].setMap(null);
       self.gmarkers()[i].is_active(false);
     }
-  }
+  };
 }
 
 var model = new Model();
